@@ -53,7 +53,6 @@ type RelationMember struct {
 
 // Result returned by Query and contains parsed result of Overpass query.
 type Result struct {
-	Timestamp time.Time
 	Count     int
 	Nodes     map[int64]*Node
 	Ways      map[int64]*Way

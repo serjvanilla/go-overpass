@@ -16,9 +16,6 @@ var (
 )
 
 type overpassResponse struct {
-	OSM3S struct {
-		TimestampOSMBase time.Time `json:"timestamp_osm_base"`
-	} `json:"osm3s"`
 	Elements []overpassResponseElement `json:"elements"`
 }
 
@@ -55,7 +52,6 @@ func (c *Client) Query(query string) (Result, error) {
 	}
 
 	result := Result{
-		Timestamp: overpassRes.OSM3S.TimestampOSMBase,
 		Count:     len(overpassRes.Elements),
 		Nodes:     make(map[int64]*Node),
 		Ways:      make(map[int64]*Way),
