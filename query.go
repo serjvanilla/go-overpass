@@ -38,6 +38,16 @@ type overpassResponseElement struct {
 		Ref  int64       `json:"ref"`
 		Role string      `json:"role"`
 	} `json:"members"`
+	Geometry []struct {
+		Lat float64 `json:"lat"`
+		Lon float64 `json:"lon"`
+	} `json:"geometry"`
+	Bounds *struct {
+		MinLat float64 `json:"minlat"`
+		MinLon float64 `json:"minlon"`
+		MaxLat float64 `json:"maxlat"`
+		MaxLon float64 `json:"maxlon"`
+	} `json:"bounds"`
 	Tags map[string]string `json:"tags"`
 }
 
@@ -48,9 +58,12 @@ func (c *Client) Query(query string) (Result, error) {
 		return Result{}, err
 	}
 
+	return unmarshal(body)
+}
+
+func unmarshal(body []byte) (Result, error) {
 	var overpassRes overpassResponse
-	err = json.Unmarshal(body, &overpassRes)
-	if err != nil {
+	if err := json.Unmarshal(body, &overpassRes); err != nil {
 		return Result{}, ErrOverpassError
 	}
 
@@ -83,11 +96,22 @@ func (c *Client) Query(query string) (Result, error) {
 		case ElementTypeWay:
 			way := result.getWay(el.ID)
 			*way = Way{
-				Meta:  meta,
-				Nodes: make([]*Node, len(el.Nodes)),
+				Meta:     meta,
+				Nodes:    make([]*Node, len(el.Nodes)),
+				Geometry: make([]Point, len(el.Geometry)),
 			}
 			for idx, nodeID := range el.Nodes {
 				way.Nodes[idx] = result.getNode(nodeID)
+			}
+			if el.Bounds != nil {
+				way.Bounds.Min.Lat = el.Bounds.MinLat
+				way.Bounds.Min.Lon = el.Bounds.MinLon
+				way.Bounds.Max.Lat = el.Bounds.MaxLat
+				way.Bounds.Max.Lon = el.Bounds.MaxLon
+			}
+			for idx, geo := range el.Geometry {
+				way.Geometry[idx].Lat = geo.Lat
+				way.Geometry[idx].Lon = geo.Lon
 			}
 		case ElementTypeRelation:
 			relation := result.getRelation(el.ID)
@@ -109,6 +133,12 @@ func (c *Client) Query(query string) (Result, error) {
 					relationMember.Relation = result.getRelation(member.Ref)
 				}
 				relation.Members[idx] = relationMember
+			}
+			if el.Bounds != nil {
+				relation.Bounds.Min.Lat = el.Bounds.MinLat
+				relation.Bounds.Min.Lon = el.Bounds.MinLon
+				relation.Bounds.Max.Lat = el.Bounds.MaxLat
+				relation.Bounds.Max.Lon = el.Bounds.MaxLon
 			}
 		}
 	}

@@ -33,13 +33,24 @@ type Node struct {
 // Way represents OSM way type.
 type Way struct {
 	Meta
-	Nodes []*Node
+	Nodes    []*Node
+	Bounds   Box
+	Geometry []Point
+}
+
+type Point struct {
+	Lat, Lon float64
 }
 
 // Relation represents OSM relation type.
 type Relation struct {
 	Meta
 	Members []RelationMember
+	Bounds  Box
+}
+
+type Box struct {
+	Min, Max Point
 }
 
 // RelationMember represents OSM relation member type.
