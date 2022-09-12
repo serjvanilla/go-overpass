@@ -2,17 +2,11 @@ package overpass
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"time"
-)
-
-var (
-	// ErrHTTPError is returned on HTTP client errors
-	ErrHTTPError = errors.New("HTTP error")
-	// ErrOverpassError is returned when overpass returns not valid response
-	ErrOverpassError = errors.New("Overpass engine error")
 )
 
 type overpassResponse struct {
@@ -51,7 +45,7 @@ func (c *Client) Query(query string) (Result, error) {
 	var overpassRes overpassResponse
 	err = json.Unmarshal(body, &overpassRes)
 	if err != nil {
-		return Result{}, ErrOverpassError
+		return Result{}, fmt.Errorf("overpass engine error: %w", err)
 	}
 
 	result := Result{
@@ -125,22 +119,32 @@ func (c *Client) httpPost(query string) ([]byte, error) {
 		url.Values{"data": []string{query}},
 	)
 	if err != nil {
-		return nil, ErrHTTPError
+		return nil, fmt.Errorf("http error: %w", err)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		return nil, ErrOverpassError
-	}
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, ErrHTTPError
+		return nil, fmt.Errorf("http error: %w", err)
 	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("overpass engine error: %w", &ServerError{resp.StatusCode, body})
+	}
+
 	return body, nil
 }
 
 // Query runs query with default client.
 func Query(query string) (Result, error) {
 	return DefaultClient.Query(query)
+}
+
+type ServerError struct {
+	StatusCode int
+	Body       []byte
+}
+
+func (e *ServerError) Error() string {
+	return fmt.Sprintf("%d %s", e.StatusCode, http.StatusText(e.StatusCode))
 }
