@@ -98,10 +98,16 @@ func unmarshal(body []byte) (Result, error) {
 				way.Nodes[idx] = result.getNode(nodeID)
 			}
 			if el.Bounds != nil {
-				way.Bounds.Min.Lat = el.Bounds.MinLat
-				way.Bounds.Min.Lon = el.Bounds.MinLon
-				way.Bounds.Max.Lat = el.Bounds.MaxLat
-				way.Bounds.Max.Lon = el.Bounds.MaxLon
+				way.Bounds = &Box{
+					Min: Point{
+						Lat: el.Bounds.MinLat,
+						Lon: el.Bounds.MinLon,
+					},
+					Max: Point{
+						Lat: el.Bounds.MaxLat,
+						Lon: el.Bounds.MaxLon,
+					},
+				}
 			}
 			for idx, geo := range el.Geometry {
 				way.Geometry[idx].Lat = geo.Lat
@@ -129,10 +135,16 @@ func unmarshal(body []byte) (Result, error) {
 				relation.Members[idx] = relationMember
 			}
 			if el.Bounds != nil {
-				relation.Bounds.Min.Lat = el.Bounds.MinLat
-				relation.Bounds.Min.Lon = el.Bounds.MinLon
-				relation.Bounds.Max.Lat = el.Bounds.MaxLat
-				relation.Bounds.Max.Lon = el.Bounds.MaxLon
+				relation.Bounds = &Box{
+					Min: Point{
+						Lat: el.Bounds.MinLat,
+						Lon: el.Bounds.MinLon,
+					},
+					Max: Point{
+						Lat: el.Bounds.MaxLat,
+						Lon: el.Bounds.MaxLon,
+					},
+				}
 			}
 		}
 	}

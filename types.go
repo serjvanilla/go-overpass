@@ -34,7 +34,7 @@ type Node struct {
 type Way struct {
 	Meta
 	Nodes    []*Node
-	Bounds   Box
+	Bounds   *Box
 	Geometry []Point
 }
 
@@ -46,7 +46,7 @@ type Point struct {
 type Relation struct {
 	Meta
 	Members []RelationMember
-	Bounds  Box
+	Bounds  *Box
 }
 
 type Box struct {
