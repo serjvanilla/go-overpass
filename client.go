@@ -1,13 +1,20 @@
 package overpass
 
-import "net/http"
+import (
+	"net/http"
+	"net/url"
+)
 
 const apiEndpoint = "https://overpass-api.de/api/interpreter"
+
+type HTTPClient interface {
+	PostForm(url string, data url.Values) (*http.Response, error)
+}
 
 // A Client manages communication with the Overpass API.
 type Client struct {
 	apiEndpoint string
-	httpClient  *http.Client
+	httpClient  HTTPClient
 	semaphore   chan struct{}
 }
 
@@ -20,7 +27,7 @@ func New() Client {
 func NewWithSettings(
 	apiEndpoint string,
 	maxParallel int,
-	httpClient *http.Client,
+	httpClient HTTPClient,
 ) Client {
 	c := Client{
 		apiEndpoint: apiEndpoint,
