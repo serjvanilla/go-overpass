@@ -20,6 +20,7 @@ type Meta struct {
 	Changeset int64
 	User      string
 	UID       int64
+	Visible   *bool
 	Tags      map[string]string
 }
 
@@ -62,11 +63,35 @@ type RelationMember struct {
 	Role     string
 }
 
-// Result returned by Query and contains parsed result of Overpass query.
-type Result struct {
-	Timestamp time.Time
-	Count     int
+type Create struct {
 	Nodes     map[int64]*Node
 	Ways      map[int64]*Way
 	Relations map[int64]*Relation
+}
+
+type Modify struct {
+	Nodes     map[int64]map[string]*Node
+	Ways      map[int64]map[string]*Way
+	Relations map[int64]map[string]*Relation
+}
+
+type Delete struct {
+	Nodes     map[int64]*Node
+	Ways      map[int64]*Way
+	Relations map[int64]*Relation
+}
+
+// Result returned by Query and contains parsed result of Overpass query.
+type Result struct {
+	Timestamp    time.Time
+	Count        int
+	Nodes        map[int64]*Node
+	Ways         map[int64]*Way
+	Relations    map[int64]*Relation
+	OldNodes     map[int64]*Node
+	OldWays      map[int64]*Way
+	OldRelations map[int64]*Relation
+	Create       *Create
+	Modify       *Modify
+	Delete       *Delete
 }
